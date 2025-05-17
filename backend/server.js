@@ -14,10 +14,15 @@ app.use(express.json());
 // POST /execute
 app.post('/execute', async (req, res) => {
   const { language, content } = req.body;
-  console.log(language)
+  console.log(language);
 
   if (language !== 'python') {
-    return res.status(400).json({ error: 'Only Python is supported at this time.' });
+    return res.status(400).json({
+      run: {
+        output: '',
+        stderr: 'Only Python is supported at this time.'
+      }
+    });
   }
 
   // Create a temp folder
@@ -31,10 +36,12 @@ app.post('/execute', async (req, res) => {
   const dockerCommand = `docker run --rm -v "${folderPath}:/app" python:3.10-alpine python /app/code.py`;
 
   exec(dockerCommand, { timeout: 5000 }, (err, stdout, stderr) => {
-    if (err) {
-      return res.status(500).json({ error: stderr || err.message });
-    }
-    return res.json({ output: stdout });
+    return res.json({
+      run: {
+        output: stdout || '',
+        stderr: stderr || ''
+      }
+    });
   });
 });
 
