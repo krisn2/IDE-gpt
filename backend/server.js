@@ -14,26 +14,37 @@ app.use(express.json());
 // POST /execute
 app.post('/execute', async (req, res) => {
   const { language, content } = req.body;
-  console.log(language);
 
-  if (language !== 'python') {
+  if (!['python', 'javascript'].includes(language)) {
     return res.status(400).json({
       run: {
         output: '',
-        stderr: 'Only Python is supported at this time.'
+        stderr: 'Only Python and JavaScript are supported at this time.'
       }
     });
   }
 
-  // Create a temp folder
   const folderPath = path.join(__dirname, 'temp', uuid());
   fs.mkdirSync(folderPath, { recursive: true });
 
-  const codeFilePath = path.join(folderPath, 'code.py');
+  let fileName = '';
+  let dockerImage = '';
+  let runCommand = '';
+
+  if (language === 'python') {
+    fileName = 'code.py';
+    dockerImage = 'python:3.10-alpine';
+    runCommand = `python /app/${fileName}`;
+  } else if (language === 'javascript') {
+    fileName = 'code.js';
+    dockerImage = 'node:20-alpine';
+    runCommand = `node /app/${fileName}`;
+  }
+
+  const codeFilePath = path.join(folderPath, fileName);
   fs.writeFileSync(codeFilePath, content);
 
-  // Run code using Docker
-  const dockerCommand = `docker run --rm -v "${folderPath}:/app" python:3.10-alpine python /app/code.py`;
+  const dockerCommand = `docker run --rm -v "${folderPath}:/app" ${dockerImage} ${runCommand}`;
 
   exec(dockerCommand, { timeout: 5000 }, (err, stdout, stderr) => {
     return res.json({
@@ -44,6 +55,7 @@ app.post('/execute', async (req, res) => {
     });
   });
 });
+
 
 // Start server
 app.listen(PORT, () => {
