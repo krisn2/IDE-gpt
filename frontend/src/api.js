@@ -1,8 +1,8 @@
 import axios from "axios";
 
-
+ 
 const API = axios.create({
-    baseURL: "http://localhost:3000"
+    baseURL: import.meta.env.VITE_NODE_URL
 });
 
 export const executeCode = async (language, sourceCode) => {
