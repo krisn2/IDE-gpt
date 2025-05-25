@@ -1,13 +1,62 @@
 const express = require('express');
-const cors = require('cors');
-const executeRouter = require('./routes/executeRoute');
+const http = require('http');
+const WebSocketRouter = require('./routes/websocket');
+const serverConfig = require('./config/server');
 
-const app = express();
-const PORT = process.env.PORT || 3000;
+class Application {
+  constructor() {
+    this.app = express();
+    this.server = http.createServer(this.app);
+    this.setupMiddleware();
+    this.setupRoutes();
+    this.setupWebSocket();
+  }
 
-app.use(cors());
-app.use(express.json());
-app.use('/execute', executeRouter);
+  setupMiddleware() {
+    // Add any Express middleware here
+    this.app.use(express.json());
+    
+    // Basic health check endpoint
+    this.app.get('/health', (req, res) => {
+      res.json({ 
+        status: 'healthy', 
+        timestamp: new Date().toISOString() 
+      });
+    });
+  }
+
+  setupRoutes() {
+    // Add any HTTP routes here
+    this.app.get('/', (req, res) => {
+      res.json({ 
+        message: 'Docker Code Execution Server',
+        version: '1.0.0',
+        endpoints: {
+          websocket: 'ws://localhost:' + serverConfig.port,
+          health: '/health'
+        }
+      });
+    });
+  }
+
+  setupWebSocket() {
+    this.wsRouter = new WebSocketRouter(this.server);
+  }
+
+  start() {
+    this.server.listen(serverConfig.port, () => {
+      console.log(`Server running on port ${serverConfig.port}`);
+      console.log(`Environment: ${serverConfig.environment}`);
+      console.log(`WebSocket endpoint: ws://localhost:${serverConfig.port}`);
+    });
+  }
+}
+
+// Start the application
+const app = new Application();
+app.start();
+
+module.exports = Application;
 
 // app.post('/execute', async (req, res) => {
 //   const { language, content } = req.body;
@@ -54,7 +103,7 @@ app.use('/execute', executeRouter);
 // });
 
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`🚀 Server is running on http://localhost:${PORT}`);
-});
+// // Start server
+// app.listen(PORT, () => {
+//   console.log(`🚀 Server is running on http://localhost:${PORT}`);
+// });
