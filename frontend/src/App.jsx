@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
-import MonacoEditor from './components/MonacoEditor';
-import OutputConsole from './components/OutputConsole';
+import MonacoEditor from './Components/MonacoEditor';
+import OutputConsole from './Components/OutputConsole';
 import useWebSocket from './hooks/useWebSocket';
 import { languageConfigs, codeSamples } from './config/languageConfigs';
 
