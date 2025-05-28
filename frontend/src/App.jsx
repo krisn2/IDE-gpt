@@ -1,8 +1,8 @@
-import React, { useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import MonacoEditor from './Components/MonacoEditor';
 import OutputConsole from './Components/OutputConsole';
 import useWebSocket from './hooks/useWebSocket';
-import { languageConfigs, codeSamples } from './config/languageConfigs';
+import { languageConfigs} from './config/languageConfigs';
 
 const App = () => {
   // State management
@@ -13,7 +13,6 @@ const App = () => {
   const [stdinInput, setStdinInput] = useState('');
   const [executionTime, setExecutionTime] = useState('');
   const [runtimeStatus, setRuntimeStatus] = useState('Ready');
-  const [editorTheme, setEditorTheme] = useState('vs-dark');
 
   // Refs
   const startTimeRef = useRef(null);
@@ -46,7 +45,7 @@ const App = () => {
         break;
 
       case "exit":
-        const executionDuration = ((Date.now() - startTimeRef.current) / 1000).toFixed(2);
+        let executionDuration = ((Date.now() - startTimeRef.current) / 1000).toFixed(2);
         appendToOutput(`Program exited with code ${data.code}`, "system");
         setExecutionTime(`Execution time: ${executionDuration}s`);
         setIsRunning(false);
@@ -110,21 +109,14 @@ const App = () => {
     appendToOutput(`> ${input}`, "user-input"); // Optional: show user input in console
   };
 
-  // Load code sample
-  const loadCodeSample = (sampleName) => {
-    if (codeSamples[sampleName] && codeSamples[sampleName][language]) {
-      setCode(codeSamples[sampleName][language]);
-    }
-  };
 
-  // Handle language change
+
   const handleLanguageChange = (newLanguage) => {
     setLanguage(newLanguage);
-    // Load default code for the new language
     if (languageConfigs[newLanguage]) {
       setCode(languageConfigs[newLanguage].defaultCode);
     }
-    clearOutput(); // Clear output on language change
+    clearOutput();
   };
 
   // Clear output
@@ -140,21 +132,10 @@ const App = () => {
         <header className="flex justify-between items-center mb-5 pb-2.5 border-b border-gray-300">
           <div className="flex items-center gap-2.5">
             <span className="text-2xl text-blue-600">⚡</span>
-            <h1 className="text-3xl font-bold text-blue-600 m-0">CodeRunner</h1>
-            <span className="text-sm text-gray-500 ml-2">with Monaco Editor</span>
+            <h1 className="text-3xl font-bold text-blue-600 m-0">Online-IDE</h1>
           </div>
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <label className="text-sm font-medium">Theme:</label>
-              <select
-                value={editorTheme}
-                onChange={(e) => setEditorTheme(e.target.value)}
-                className="p-1.5 text-sm border border-gray-300 rounded bg-white"
-              >
-                <option value="vs-dark">Dark</option>
-                <option value="vs-light">Light</option>
-              </select>
-            </div>
+            
             <div className="flex items-center gap-2">
               <div className={`w-2.5 h-2.5 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
               <span className="text-sm">{isConnected ? 'Connected' : 'Disconnected'}</span>
@@ -180,8 +161,6 @@ const App = () => {
                 >
                   <option value="python">🐍 Python</option>
                   <option value="javascript">🟨 JavaScript</option>
-                  <option value="java">☕ Java</option>
-                  <option value="cpp">⚙️ C++</option>
                 </select>
               </div>
             </div>
@@ -193,36 +172,8 @@ const App = () => {
                   value={code}
                   onChange={setCode}
                   language={language}
-                  theme={editorTheme}
-                  height="450px"
+                  height="400px"
                 />
-              </div>
-
-              {/* Code Samples */}
-              <div className="mb-4">
-                <div className="flex flex-wrap gap-2 mb-2">
-                  <span className="text-sm font-medium text-gray-600">Quick Start:</span>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    onClick={() => loadCodeSample('hello')}
-                    className="px-3 py-1.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full text-sm font-medium hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-sm"
-                  >
-                    👋 Hello World
-                  </button>
-                  <button
-                    onClick={() => loadCodeSample('calculator')}
-                    className="px-3 py-1.5 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-full text-sm font-medium hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-sm"
-                  >
-                    🧮 Calculator
-                  </button>
-                  <button
-                    onClick={() => loadCodeSample('factorial')}
-                    className="px-3 py-1.5 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-full text-sm font-medium hover:from-purple-600 hover:to-purple-700 transition-all duration-200 shadow-sm"
-                  >
-                    🔢 Factorial
-                  </button>
-                </div>
               </div>
 
               {/* Button Group */}

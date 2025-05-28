@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
+import Editor from '@monaco-editor/react';
 
-const MonacoEditor = ({ value, onChange, language, theme = 'vs-dark', height = '400px' }) => {
+const MonacoEditor = ({ value, onChange, language, height = '400px' }) => {
   const editorRef = useRef(null);
 
   useEffect(() => {
@@ -23,15 +24,6 @@ const MonacoEditor = ({ value, onChange, language, theme = 'vs-dark', height = '
     }
   }, [value]);
 
-  const getLanguageMode = (lang) => {
-    const modes = {
-      python: 'python',
-      javascript: 'javascript',
-      java: 'java',
-      cpp: 'cpp',
-    };
-    return modes[lang] || 'text';
-  };
 
   return (
     <div
@@ -42,35 +34,41 @@ const MonacoEditor = ({ value, onChange, language, theme = 'vs-dark', height = '
       <div className="absolute top-0 right-0 z-10 bg-gray-800 text-white px-2 py-1 text-xs rounded-bl">
         {language.toUpperCase()}
       </div>
-      <textarea
-        defaultValue={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full h-full p-4 font-mono text-sm bg-gray-900 text-gray-100 border-none resize-none outline-none"
-        style={{
-          background: theme === 'vs-dark' ? '#1e1e1e' : '#ffffff',
-          color: theme === 'vs-dark' ? '#d4d4d4' : '#000000',
-          fontFamily: "'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace",
-          fontSize: '14px',
-          lineHeight: '1.5',
-          tabSize: 4,
-        }}
-        spellCheck={false}
-        autoComplete="off"
-        autoCorrect="off"
-        autoCapitalize="off"
-        data-language={getLanguageMode(language)}
-      />
-      {/* Inline style for placeholder is not standard React, but can be done via global CSS or styled-components */}
-      <style jsx>{`
-        textarea::placeholder {
-          color: ${theme === 'vs-dark' ? '#6a6a6a' : '#999999'};
-        }
-        textarea:focus {
-          box-shadow: inset 0 0 0 1px #007acc;
-        }
-      `}</style>
+      <Editor 
+      defaultLanguage={language} 
+      theme='vs-dark' value={value} 
+      onChange={onChange} 
+      options={{ automaticLayout: true,
+       minimap: { enabled: false },
+       wordWrap: 'on',
+       padding: { top: 10, bottom: 10, left: 10, right: 10 },
+       height:"70vh"
+       }} />
+
     </div>
   );
 };
 
 export default MonacoEditor;
+
+
+
+
+//  <textarea
+//         defaultValue={value}
+//         onChange={(e) => onChange(e.target.value)}
+//         className="w-full h-full p-4 font-mono text-sm bg-gray-900 text-gray-100 border-none resize-none outline-none"
+//         style={{
+//           background: theme === 'vs-dark' ? '#1e1e1e' : '#ffffff',
+//           color: theme === 'vs-dark' ? '#d4d4d4' : '#000000',
+//           fontFamily: "'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace",
+//           fontSize: '14px',
+//           lineHeight: '1.5',
+//           tabSize: 4,
+//         }}
+//         spellCheck={false}
+//         autoComplete="off"
+//         autoCorrect="off"
+//         autoCapitalize="off"
+//         data-language={getLanguageMode(language)}
+//       />
